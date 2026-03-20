@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plano 14 Dias — AI Producer Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green: #00ff7f;
+  --green-dim: rgba(0,255,127,0.12);
+  --bg: #0a0a0a;
+  --bg2: #111111;
+  --bg3: #161616;
+  --text: #ffffff;
+  --muted: #666666;
+  --border: #1e1e1e;
+  --red: #ff4444;
+  --amber: #ffb020;
+  --blue: #3b82f6;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; min-height: 100vh; }
+
+/* HEADER */
+.header {
+  padding: 32px 48px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.header-left h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.header-left h1 span { color: var(--green); }
+.header-left p { font-size: 13px; color: var(--muted); }
+.progress-wrap { min-width: 260px; }
+.progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.progress-label strong { color: var(--green); font-size: 14px; }
+.progress-bar { background: var(--bg3); border-radius: 4px; height: 6px; overflow: hidden; border: 1px solid var(--border); }
+.progress-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width 0.4s ease; }
+.team-badges { display: flex; gap: 8px; margin-top: 12px; }
+.team-badge { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); letter-spacing: 0.5px; }
+
+/* TABS */
+.tabs { display: flex; gap: 0; padding: 0 48px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+.tab { padding: 14px 20px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; white-space: nowrap; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+/* CONTENT */
+.content { padding: 32px 48px; max-width: 900px; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* WEEK */
+.week-block { margin-bottom: 40px; }
+.week-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.week-count { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+/* TASK */
+.task {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: var(--bg2);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, opacity 0.2s;
+  position: relative;
+}
+.task:hover { border-color: #333; background: var(--bg3); }
+.task.done { opacity: 0.5; }
+.task.done .task-title { text-decoration: line-through; color: var(--muted); }
+
+.check-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid #333;
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  background: transparent;
+}
+.task.done .check-box {
+  background: var(--green);
+  border-color: var(--green);
+}
+.check-box svg { opacity: 0; transition: opacity 0.15s; }
+.task.done .check-box svg { opacity: 1; }
+
+.task-body { flex: 1; }
+.task-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.task-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.task-meta { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 6px; }
+
+.badge-owner {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.owner-freddy { background: rgba(0,255,127,0.12); color: var(--green); }
+.owner-rafa { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.owner-both { background: rgba(255,176,32,0.12); color: var(--amber); }
+
+.badge-type {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.type-setup { background: #1a1a2e; color: #818cf8; }
+.type-venda { background: rgba(0,255,127,0.08); color: var(--green); }
+.type-conteudo { background: rgba(255,176,32,0.1); color: var(--amber); }
+.type-entrega { background: rgba(59,130,246,0.1); color: #60a5fa; }
+.type-gestao { background: #1a1a1a; color: var(--muted); }
+
+.task-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.task-tag {
+  font-size: 10px;
+  color: var(--muted);
+  background: #161616;
+  border: 1px solid #222;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.day-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  background: #161616;
+  border: 1px solid #222;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* RECURSOS */
+.resources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+.resource-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+}
+.resource-card h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; color: var(--green); }
+.resource-item { font-size: 13px; color: #ccc; margin-bottom: 8px; display: flex; gap: 8px; }
+.resource-item::before { content: '→'; color: var(--muted); flex-shrink: 0; }
+
+/* KPIs */
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.kpi-num { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--green); line-height: 1; }
+.kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+/* PREÇOS */
+.price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.price-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+.price-card.featured { border-color: var(--green); background: var(--bg3); }
+.price-card .name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 8px; }
+.price-card .price { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--text); line-height: 1; }
+.price-card .price span { font-family: 'Inter', sans-serif; font-size: 13px; color: var(--muted); font-weight: 400; }
+.price-card .desc { font-size: 12px; color: var(--muted); margin: 10px 0 16px; line-height: 1.6; }
+.price-card ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.price-card li { font-size: 12px; color: #aaa; display: flex; gap: 8px; }
+.price-card li::before { content: '✓'; color: var(--green); flex-shrink: 0; }
+.featured-badge { font-size: 10px; font-weight: 700; color: #000; background: var(--green); padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+
+.rec-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 24px; }
+.rec-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.rec-card .rec-plan { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--green); margin-bottom: 4px; }
+.rec-card .rec-price { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.rec-card .rec-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* CONTEUDO */
+.post-list { display: flex; flex-direction: column; gap: 8px; }
+.post-item { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.post-header { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+.post-day { font-size: 11px; font-weight: 700; color: var(--muted); min-width: 40px; }
+.post-format { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+.fmt-reels { background: rgba(239,68,68,0.15); color: #f87171; }
+.fmt-carrossel { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.fmt-feed { background: rgba(0,255,127,0.1); color: var(--green); }
+.post-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.post-hook { font-size: 12px; color: #aaa; font-style: italic; margin-bottom: 6px; line-height: 1.5; }
+.post-note { font-size: 11px; color: var(--muted); }
+
+/* UPSELL */
+.upsell-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; padding: 20px; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; }
+.upsell-step { text-align: center; }
+.upsell-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.upsell-price { font-size: 11px; color: var(--green); margin-top: 2px; }
+.upsell-arrow { color: var(--muted); font-size: 18px; }
+.upsell-total { text-align: center; background: var(--green-dim); border: 1px solid rgba(0,255,127,0.2); border-radius: 8px; padding: 10px 16px; }
+.upsell-total .upsell-name { color: var(--green); }
+
+@media (max-width: 768px) {
+  .header { padding: 24px 20px 20px; }
+  .tabs { padding: 0 20px; overflow-x: auto; }
+  .content { padding: 24px 20px; }
+  .price-grid, .kpis, .resources-grid { grid-template-columns: 1fr; }
+  .rec-grid { grid-template-columns: 1fr 1fr; }
+  .header-left h1 { font-size: 36px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>AI PRODUCER <span>STUDIO</span></h1>
+    <p>Plano de execução — 14 dias — Brasil 🇧🇷</p>
+    <div class="team-badges">
+      <div class="team-badge" style="color:#00ff7f;border-color:rgba(0,255,127,0.3)">● Freddy</div>
+      <div class="team-badge" style="color:#60a5fa;border-color:rgba(59,130,246,0.3)">● Rafa</div>
+      <div class="team-badge" style="color:#ffb020;border-color:rgba(255,176,32,0.3)">● Ambos</div>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Progresso geral</span>
+      <strong id="pct">0%</strong>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="pbar" style="width:0%"></div></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;" id="ptasks">0 de 0 tarefas concluídas</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('plano',this)">📋 Plano dia a dia</button>
+  <button class="tab" onclick="showTab('precos',this)">💰 Catálogo de preços</button>
+  <button class="tab" onclick="showTab('conteudo',this)">📱 Calendário de conteúdo</button>
+  <button class="tab" onclick="showTab('ferramentas',this)">🛠 Ferramentas</button>
+  <button class="tab" onclick="showTab('kpis',this)">📊 KPIs</button>
+</div>
+
+<!-- ===== PLANO ===== -->
+<div class="content">
+<div class="panel active" id="plano">
+
+  <div class="week-block">
+    <div class="week-title">
+      Semana 1 — Infraestrutura
+      <span class="week-count" id="wc1"></span>
+    </div>
+
+    <!-- DIA 1 -->
+    <div class="task" onclick="toggleTask(this)" data-id="t1">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIA 1</span>
+          <span class="task-title">Finalizar catálogo de preços</span>
+          <span class="badge-owner owner-freddy">Freddy</span>
+          <span class="badge-type type-setup">Setup</span>
+        </div>
+        <div class="task-meta">Definir os 3 pacotes (Starter R$1.997 / Pro R$3.497 / Full R$5.997) e os planos de manutenção mensal. Esse documento vai guiar todas as conversas de venda.</div>
+        <div class="task-tags">
+          <span class="task-tag">Starter R$1.997</span>
+          <span class="task-tag">Pro R$3.497</span>
+          <span class="task-tag">Full R$5.997</span>
+          <span class="task-tag">Manutenção R$397–1.997/mês</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t2">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIA 1</span>
+          <span class="task-title">Criar CRM no Notion ou Google Sheets</span>
+          <span class="badge-owner owner-both">Ambos</span>
+          <span class="badge-type type-setup">Setup</span>
+        </div>
+        <div class="task-meta">Pipeline simples: Lead → Demo agendada → Proposta enviada → Fechado → Entrega. Uma linha por lead, com nome, nicho, contato e status.</div>
+        <div class="task-tags">
+          <span class="task-tag">Notion (grátis)</span>
+          <span class="task-tag">Google Sheets (grátis)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t3">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIA 1</span>
+          <span class="task-title">Atualizar bio do Instagram</span>
+          <span class="badge-owner owner-freddy">Freddy</span>
+          <span class="badge-type type-conteudo">Conteúdo</span>
+        </div>
+        <div class="task-meta">Nova bio: ⚡ Transformamos seu negócio com IA · 🤖 Sites · Agentes · Automações · Vídeos · 📍 Brasil · Resultados em 7 dias · 👇 Veja o que criamos pra você</div>
+        <div class="task-tags">
+          <span class="task-tag">Instagram</span>
+          <span class="task-tag">5 min</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIA 2 -->
+    <div class="task" onclick="toggleTask(this)" data-id="t4">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIA 2</span>
+          <span class="task-title">Garantir 1 demo por nicho prioritário online</span>
+          <span class="badge-owner owner-freddy">Freddy</span>
+          <span class="badge-type type-setup">Setup</span>
+        </div>
+        <div class="task-meta">Estética, barbearia e clínica. LP real com domínio ou subdomínio limpo. Essa é a arma principal de venda — tem que estar impecável.</div>
+        <div class="task-tags">
+          <span class="task-tag">Estética</span>
+          <span class="task-tag">Barbearia</span>
+          <span class="task-tag">Clínica</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t5">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIA 2</span>
+          <span class="task-title">Demo do AI Agent funcionando e apresentável</span>
+          <span class="badge-owner owner-rafa">Rafa</span>
+          <span class="badge-type type-setup">Setup</span>
+        </div>
+        <div class="task-meta">Agente de agendamento + FAQ pelo WhatsApp. Precisa estar pronto para mostrar ao vivo na call de demo. Testar antes de qualquer apresentação.</div>
+        <div class="task-tags">
+          <span class="task-tag">WhatsApp</span>
+          <span class="task-tag">Agendamento automático</span>
+          <span class="task-tag">FAQ automático</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIA 3 -->
+    <div class="task" onclick="toggleTask(this)" data-id="t6">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIA 3</span>
+          <span class="task-title">Script de WhatsApp para os 3 nichos</span>
+          <span class="badge-owner owner-both">Ambos</span>
+          <span class="badge-type type-venda">Venda</span>
+        </div>
+        <div class="task-meta">Mensagem de abertura + link da demo do nicho do lead. 3 versões: estética, barbearia, clínica. Curto, direto, com CTA claro para responder.</div>
+        <div class="task-tags">
+          <span class="task-tag">Demo-first</span>
+          <span class="task-tag">3 versões</span>
+          <span class="task-tag">WhatsApp</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t7">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIA 3</span>
+          <span class="task-title">Montar lista de 30 leads qualificados</span>
+          <span class="badge-owner owner-both">Ambos</span>
+          <span class="badge-type type-venda">Venda</span>
+        </div>
+        <div class="task-meta">10 por nicho. Fonte: Instagram, Google Maps, indicações. Capturar: nome do negócio, nome do dono se possível, WhatsApp, nicho.</div>
+        <div class="task-tags">
+          <span class="task-tag">30 leads</span>
+          <span class="task-tag">Google Maps</span>
+          <span class="task-tag">Instagram</span>
+          <span class="task-tag">Indicações</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIA 4-5 -->
+    <div class="task" onclick="toggleTask(this)" data-id="t8">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIAS 4–5</span>
+          <span class="task-title">Proposta comercial template — 1 página</span>
+          <span class="badge-owner owner-freddy">Freddy</span>
+          <span class="badge-type type-venda">Venda</span>
+        </div>
+        <div class="task-meta">PDF ou Notion. Estrutura: problema → solução → pacotes → garantia → CTA. Para enviar após a demo call. Deve ser simples e visual.</div>
+        <div class="task-tags">
+          <span class="task-tag">PDF ou Notion</span>
+          <span class="task-tag">1 página</span>
+          <span class="task-tag">Com preços</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t9">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIAS 4–5</span>
+          <span class="task-title">Primeiros 3 posts no Instagram</span>
+          <span class="badge-owner owner-freddy">Freddy</span>
+          <span class="badge-type type-conteudo">Conteúdo</span>
+        </div>
+        <div class="task-meta">Post 1: apresentação do estúdio. Post 2: Reels antes/depois de LP. Post 3: O que é AI Agent e por que seu negócio precisa. Sem perfeccionismo — publicar.</div>
+        <div class="task-tags">
+          <span class="task-tag">Feed</span>
+          <span class="task-tag">Reels</span>
+          <span class="task-tag">Carrossel</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIA 6-7 -->
+    <div class="task" onclick="toggleTask(this)" data-id="t10">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIAS 6–7</span>
+          <span class="task-title">Protocolo de demo call (30 min)</span>
+          <span class="badge-owner owner-both">Ambos</span>
+          <span class="badge-type type-venda">Venda</span>
+        </div>
+        <div class="task-meta">Script da call: 1. Entender o negócio (5 min) 2. Mostrar LP do nicho ao vivo (10 min) 3. Mostrar AI Agent funcionando — Rafa (10 min) 4. Apresentar pacotes (5 min). Treinar juntos antes da 1ª call real.</div>
+        <div class="task-tags">
+          <span class="task-tag">30 minutos</span>
+          <span class="task-tag">Demo ao vivo</span>
+          <span class="task-tag">Freddy + Rafa juntos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEMANA 2 -->
+  <div class="week-block">
+    <div class="week-title">
+      Semana 2 — Vendas ativas e primeiros fechamentos
+      <span class="week-count" id="wc2"></span>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t11">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIA 8</span>
+          <span class="task-title">Disparar os 30 leads pelo WhatsApp</span>
+          <span class="badge-owner owner-both">Ambos</span>
+          <span class="badge-type type-venda">Venda</span>
+        </div>
+        <div class="task-meta">Usar o script com a demo do nicho do lead. Enviar em blocos de 10 por vez. Registrar cada resposta no CRM. Meta: 5–8 respostas positivas.</div>
+        <div class="task-tags">
+          <span class="task-tag">30 disparos</span>
+          <span class="task-tag">Meta: 5–8 respostas</span>
+          <span class="task-tag">Registrar no CRM</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t12">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIAS 8–10</span>
+          <span class="task-title">Realizar as demo calls agendadas</span>
+          <span class="badge-owner owner-both">Ambos</span>
+          <span class="badge-type type-venda">Venda</span>
+        </div>
+        <div class="task-meta">Meta: 5 calls realizadas. Freddy mostra a LP ao vivo. Rafa mostra o agente. Apresentar o pacote Pro como principal. Enviar proposta em até 2h após a call.</div>
+        <div class="task-tags">
+          <span class="task-tag">Meta: 5 calls</span>
+          <span class="task-tag">Proposta em 2h</span>
+          <span class="task-tag">Pacote Pro em destaque</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t13">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIAS 9–11</span>
+          <span class="task-title">Follow-up sistemático — D+2 e D+5</span>
+          <span class="badge-owner owner-both">Ambos</span>
+          <span class="badge-type type-venda">Venda</span>
+        </div>
+        <div class="task-meta">Para leads que não responderam: follow-up no D+2 com valor adicional (ex: vídeo curto do agent). No D+5: última mensagem com oferta limitada. Registrar tudo no CRM.</div>
+        <div class="task-tags">
+          <span class="task-tag">D+2 follow-up</span>
+          <span class="task-tag">D+5 último contato</span>
+          <span class="task-tag">CRM atualizado</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t14">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIAS 10–12</span>
+          <span class="task-title">Fechar 2–3 vendas</span>
+          <span class="badge-owner owner-both">Ambos</span>
+          <span class="badge-type type-venda">Venda</span>
+        </div>
+        <div class="task-meta">Meta mínima: 2 fechamentos. Ideal: 3. Ticket mínimo R$1.997 (Starter). Ideal: R$3.497 (Pro). 2 × Pro = R$6.994. 3 × Pro = R$10.491. Cobrar 50% na assinatura.</div>
+        <div class="task-tags">
+          <span class="task-tag">Meta: 2–3 vendas</span>
+          <span class="task-tag">50% entrada</span>
+          <span class="task-tag">R$6k–10k</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t15">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIAS 11–13</span>
+          <span class="task-title">Onboarding dos clientes fechados</span>
+          <span class="badge-owner owner-freddy">Freddy</span>
+          <span class="badge-type type-entrega">Entrega</span>
+        </div>
+        <div class="task-meta">D+0: mensagem de confirmação + formulário de briefing. D+3: entregar rascunho da LP para aprovação. D+7: versão final + handoff. Oferecer manutenção mensal no D+7.</div>
+        <div class="task-tags">
+          <span class="task-tag">D+0 confirmação</span>
+          <span class="task-tag">D+3 rascunho</span>
+          <span class="task-tag">D+7 entrega final</span>
+          <span class="task-tag">Upsell manutenção</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t16">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIAS 12–14</span>
+          <span class="task-title">Continuar calendário de conteúdo no IG</span>
+          <span class="badge-owner owner-freddy">Freddy</span>
+          <span class="badge-type type-conteudo">Conteúdo</span>
+        </div>
+        <div class="task-meta">Posts 4–7 do calendário. Reels de demo ao vivo do agent, carrossel "negócio com vs sem IA", portfolio de LP entregue. Publicar mesmo que imperfeito.</div>
+        <div class="task-tags">
+          <span class="task-tag">Posts 4–7</span>
+          <span class="task-tag">Reels prioritário</span>
+          <span class="task-tag">Consistência > perfeição</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" onclick="toggleTask(this)" data-id="t17">
+      <div class="check-box"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="task-body">
+        <div class="task-header">
+          <span class="day-label">DIA 14</span>
+          <span class="task-title">Review semanal + ajuste de rota</span>
+          <span class="badge-owner owner-both">Ambos</span>
+          <span class="badge-type type-gestao">Gestão</span>
+        </div>
+        <div class="task-meta">Reunião de 30 min: o que funcionou, o que não funcionou. Ajustar script se necessário. Definir meta da próxima semana. Documentar os aprendizados.</div>
+        <div class="task-tags">
+          <span class="task-tag">30 min</span>
+          <span class="task-tag">Freddy + Rafa</span>
+          <span class="task-tag">Documentar aprendizados</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PREÇOS ===== -->
+<div class="panel" id="precos">
+  <div class="price-grid">
+    <div class="price-card">
+      <div class="name">Starter</div>
+      <div class="price">R$1.997 <span>único</span></div>
+      <div class="desc">Para negócios que precisam de presença profissional rápida.</div>
+      <ul>
+        <li>Landing page profissional (1 página)</li>
+        <li>Domínio configurado</li>
+        <li>Botão WhatsApp + formulário</li>
+        <li>Versão mobile</li>
+        <li>Entrega em 5 dias úteis</li>
+      </ul>
+    </div>
+    <div class="price-card featured">
+      <div class="featured-badge">MAIS VENDIDO</div>
+      <div class="name">Pro</div>
+      <div class="price">R$3.497 <span>único</span></div>
+      <div class="desc">LP + agente de IA para atender e agendar clientes 24h.</div>
+      <ul>
+        <li>Tudo do Starter</li>
+        <li>AI Agent no WhatsApp</li>
+        <li>FAQ automatizado</li>
+        <li>Agendamento inteligente</li>
+        <li>Treinamento personalizado</li>
+        <li>Entrega em 7 dias úteis</li>
+      </ul>
+    </div>
+    <div class="price-card">
+      <div class="name">Full</div>
+      <div class="price">R$5.997 <span>único</span></div>
+      <div class="desc">Solução completa: LP + automação + vídeo com IA.</div>
+      <ul>
+        <li>Tudo do Pro</li>
+        <li>Vídeo institucional com IA</li>
+        <li>1 mês de manutenção incluso</li>
+        <li>Relatório mensal</li>
+        <li>Suporte prioritário</li>
+        <li>Entrega em 10 dias úteis</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:12px;">Manutenção Mensal (recorrência)</div>
+  <div class="rec-grid">
+    <div class="rec-card">
+      <div class="rec-plan">Básico</div>
+      <div class="rec-price">R$397/mês</div>
+      <div class="rec-desc">Atualizações, hospedagem, suporte básico</div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-plan">Growth</div>
+      <div class="rec-price">R$797/mês</div>
+      <div class="rec-desc">Básico + 4 posts/mês + relatório mensal</div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-plan">Pro</div>
+      <div class="rec-price">R$1.297/mês</div>
+      <div class="rec-desc">Growth + gestão do agente de IA</div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-plan">Full</div>
+      <div class="rec-price">R$1.997/mês</div>
+      <div class="rec-desc">Tudo + 1 vídeo com IA por mês</div>
+    </div>
+  </div>
+
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:12px;margin-top:32px;">Jornada de upsell por cliente</div>
+  <div class="upsell-flow">
+    <div class="upsell-step"><div class="upsell-name">Landing Page</div><div class="upsell-price">R$1.997</div></div>
+    <div class="upsell-arrow">→</div>
+    <div class="upsell-step"><div class="upsell-name">Manutenção</div><div class="upsell-price">R$397/mês</div></div>
+    <div class="upsell-arrow">→</div>
+    <div class="upsell-step"><div class="upsell-name">AI Agent</div><div class="upsell-price">+R$1.500</div></div>
+    <div class="upsell-arrow">→</div>
+    <div class="upsell-step"><div class="upsell-name">Vídeo IA</div><div class="upsell-price">+R$1.500</div></div>
+    <div class="upsell-arrow">→</div>
+    <div class="upsell-total"><div class="upsell-name">LTV total</div><div class="upsell-price">R$8k–12k</div></div>
+  </div>
+</div>
+
+<!-- ===== CONTEÚDO ===== -->
+<div class="panel" id="conteudo">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:20px;">14 Posts — 2 semanas — Nichos locais BR</div>
+  <div class="post-list">
+
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:8px 0;border-bottom:1px solid var(--border);margin-bottom:8px;">Semana 1</div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 1</span><span class="post-format fmt-feed">Feed</span></div>
+      <div class="post-title">Apresentação do estúdio</div>
+      <div class="post-hook">"Transformamos negócios locais com IA. Conheça o AI Producer Studio."</div>
+      <div class="post-note">Visual: logo animada ou screenshot da landing · CTA: link na bio</div>
+    </div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 2</span><span class="post-format fmt-reels">Reels</span></div>
+      <div class="post-title">Antes e depois — landing page real</div>
+      <div class="post-hook">"Seu site parece isso? A gente transforma em 7 dias." [site feio → LP profissional]</div>
+      <div class="post-note">Tela dividida antes/depois · Alto potencial de viralização</div>
+    </div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 3</span><span class="post-format fmt-carrossel">Carrossel</span></div>
+      <div class="post-title">O que é AI Agent e por que seu negócio precisa</div>
+      <div class="post-hook">"Imagina ter um funcionário que responde clientes às 3h da manhã, nunca esquece nada e custa R$13/dia."</div>
+      <div class="post-note">5 slides: problema → solução → como funciona → resultado → CTA</div>
+    </div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 5</span><span class="post-format fmt-reels">Reels</span></div>
+      <div class="post-title">Demo ao vivo do AI Agent</div>
+      <div class="post-hook">"Gravei uma conversa real com nosso agente de IA. Olha o que ele faz sozinho..."</div>
+      <div class="post-note">Screen recording do WhatsApp com o agente respondendo · Máximo impacto</div>
+    </div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 6</span><span class="post-format fmt-carrossel">Carrossel</span></div>
+      <div class="post-title">5 motivos para ter uma landing page profissional</div>
+      <div class="post-hook">"Seu cliente te julga nos primeiros 3 segundos. O que ele vê quando pesquisa seu negócio?"</div>
+      <div class="post-note">Nichos: estética, barbearia, clínica · CTA para orçamento</div>
+    </div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 7</span><span class="post-format fmt-feed">Feed</span></div>
+      <div class="post-title">Portfolio — LP estética ou barbearia</div>
+      <div class="post-hook">"Criamos o site para [nicho]. Em 5 dias. Veja o resultado."</div>
+      <div class="post-note">Screenshot da LP · Tag o nicho · Link na bio</div>
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:8px 0;border-bottom:1px solid var(--border);margin:16px 0 8px;">Semana 2</div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 8</span><span class="post-format fmt-reels">Reels</span></div>
+      <div class="post-title">Bastidores — como criamos uma LP do zero</div>
+      <div class="post-hook">"Do briefing à entrega em 60 segundos. Veja como funciona nosso processo."</div>
+      <div class="post-note">Screen recording acelerado · Gera confiança e autoridade</div>
+    </div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 9</span><span class="post-format fmt-carrossel">Carrossel</span></div>
+      <div class="post-title">Negócio com IA vs sem IA em 2026</div>
+      <div class="post-hook">"Dois donos de barbearia. Mesmo bairro. Resultados completamente diferentes. A diferença? Automação."</div>
+      <div class="post-note">Formato lado a lado · Alto engajamento</div>
+    </div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 10</span><span class="post-format fmt-reels">Reels</span></div>
+      <div class="post-title">Resultado de cliente real</div>
+      <div class="post-hook">"[Nome] tinha [problema]. Depois da nossa LP + agente, [resultado concreto]."</div>
+      <div class="post-note">Use caso real se tiver · Senão: demo hipotética com transparência</div>
+    </div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 11</span><span class="post-format fmt-carrossel">Carrossel</span></div>
+      <div class="post-title">Quanto custa NÃO ter presença digital</div>
+      <div class="post-hook">"Cada mês sem site profissional são clientes indo para o concorrente. Fiz as contas pra você."</div>
+      <div class="post-note">5 slides com cálculo simples · Muito compartilhável</div>
+    </div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 12</span><span class="post-format fmt-feed">Feed</span></div>
+      <div class="post-title">Portfolio — LP clínica ou pet care</div>
+      <div class="post-hook">"Mais um projeto entregue. [Nicho] com presença digital que converte."</div>
+      <div class="post-note">Screenshot da LP · Hashtags do nicho</div>
+    </div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 13</span><span class="post-format fmt-reels">Reels</span></div>
+      <div class="post-title">Vídeo institucional com IA — demo</div>
+      <div class="post-hook">"Esse vídeo foi feito 100% com IA em menos de 24h. Imagina ter isso no seu negócio."</div>
+      <div class="post-note">Mostrar o vídeo demo que vocês já têm · Alto fator WOW</div>
+    </div>
+
+    <div class="post-item">
+      <div class="post-header"><span class="post-day">Dia 14</span><span class="post-format fmt-carrossel">Carrossel</span></div>
+      <div class="post-title">CTA final — Demo gratuita por tempo limitado</div>
+      <div class="post-hook">"Criamos uma versão do seu site ANTES de você pagar qualquer coisa. Quer ver?"</div>
+      <div class="post-note">Oferta demo-first · CTA direto pro WhatsApp · Fechar a semana com conversão</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== FERRAMENTAS ===== -->
+<div class="panel" id="ferramentas">
+  <div class="resources-grid">
+    <div class="resource-card">
+      <h3>🆓 Grátis</h3>
+      <div class="resource-item">Notion — CRM + pipeline + documentação</div>
+      <div class="resource-item">WhatsApp Business — vendas, demos, onboarding</div>
+      <div class="resource-item">Cal.com — agendamento automático de demos</div>
+      <div class="resource-item">Loom — vídeos demo personalizados para leads</div>
+      <div class="resource-item">Google Sheets — planilha de leads e controle</div>
+    </div>
+    <div class="resource-card">
+      <h3>💳 Pagos</h3>
+      <div class="resource-item">Hotmart ou Pagar.me — cobranças, links de pagamento, recorrência</div>
+      <div class="resource-item">Make.com — automação de follow-ups</div>
+      <div class="resource-item">Vercel ou Netlify — hospedagem das LPs</div>
+      <div class="resource-item">Typeform — formulários de briefing pós-venda</div>
+    </div>
+    <div class="resource-card">
+      <h3>📱 Canais de venda</h3>
+      <div class="resource-item">WhatsApp — canal principal, demo-first</div>
+      <div class="resource-item">Instagram — conteúdo + DMs para leads</div>
+      <div class="resource-item">Indicações — cada cliente fechado gera indicações</div>
+      <div class="resource-item">Google Maps — prospecção de negócios locais</div>
+    </div>
+    <div class="resource-card">
+      <h3>🎯 Nichos prioritários</h3>
+      <div class="resource-item">🔴 Estética / beleza — decisão rápida, demo pronta</div>
+      <div class="resource-item">🔴 Barbearias — mercado enorme, WhatsApp nativo</div>
+      <div class="resource-item">🟡 Clínicas / saúde — ticket alto, agendamento real</div>
+      <div class="resource-item">🟢 Arquitetura — ticket alto, ciclo longo</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KPIs ===== -->
+<div class="panel" id="kpis">
+  <div class="kpis">
+    <div class="kpi-card"><div class="kpi-num">30</div><div class="kpi-label">Leads contactados</div></div>
+    <div class="kpi-card"><div class="kpi-num">5–8</div><div class="kpi-label">Demos realizadas</div></div>
+    <div class="kpi-card"><div class="kpi-num">2–3</div><div class="kpi-label">Vendas fechadas</div></div>
+    <div class="kpi-card"><div class="kpi-num">R$6–10k</div><div class="kpi-label">Faturamento 14 dias</div></div>
+  </div>
+  <div class="resources-grid">
+    <div class="resource-card">
+      <h3>📈 Meta conservadora</h3>
+      <div class="resource-item">2 × Starter R$1.997 = R$3.994</div>
+      <div class="resource-item">2 × Manutenção R$397/mês = R$794 recorrente</div>
+      <div class="resource-item">Total mês 1: ~R$4.800</div>
+    </div>
+    <div class="resource-card">
+      <h3>🚀 Meta ideal</h3>
+      <div class="resource-item">2 × Pro R$3.497 = R$6.994</div>
+      <div class="resource-item">1 × Full R$5.997 = R$5.997</div>
+      <div class="resource-item">Total mês 1: ~R$12.991</div>
+    </div>
+    <div class="resource-card">
+      <h3>♻️ Recorrência (mês 3)</h3>
+      <div class="resource-item">5 clientes × R$397 = R$1.985/mês garantido</div>
+      <div class="resource-item">10 clientes × R$397 = R$3.970/mês garantido</div>
+      <div class="resource-item">Base sólida antes de vender qualquer coisa nova</div>
+    </div>
+    <div class="resource-card">
+      <h3>⚠️ Armadilhas a evitar</h3>
+      <div class="resource-item">Não perfeccionar o branding antes de vender</div>
+      <div class="resource-item">Não vender sem ter o CRM e o script prontos</div>
+      <div class="resource-item">Não aceitar menos de R$1.997 por LP</div>
+      <div class="resource-item">Não fazer call sem Rafa para mostrar o agent</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function toggleTask(el) {
+  el.classList.toggle('done');
+  const id = el.dataset.id;
+  const done = JSON.parse(localStorage.getItem('aps_tasks') || '{}');
+  done[id] = el.classList.contains('done');
+  localStorage.setItem('aps_tasks', JSON.stringify(done));
+  updateProgress();
+}
+
+function updateProgress() {
+  const all = document.querySelectorAll('.task');
+  const doneCount = document.querySelectorAll('.task.done').length;
+  const total = all.length;
+  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('pbar').style.width = pct + '%';
+  document.getElementById('ptasks').textContent = doneCount + ' de ' + total + ' tarefas concluídas';
+
+  // week counts
+  const w1 = document.querySelectorAll('#plano .week-block:first-child .task');
+  const w1done = document.querySelectorAll('#plano .week-block:first-child .task.done');
+  const w2 = document.querySelectorAll('#plano .week-block:last-child .task');
+  const w2done = document.querySelectorAll('#plano .week-block:last-child .task.done');
+  const wc1 = document.getElementById('wc1');
+  const wc2 = document.getElementById('wc2');
+  if(wc1) wc1.textContent = w1done.length + '/' + w1.length + ' concluídas';
+  if(wc2) wc2.textContent = w2done.length + '/' + w2.length + ' concluídas';
+}
+
+// Restore state
+window.addEventListener('DOMContentLoaded', () => {
+  const done = JSON.parse(localStorage.getItem('aps_tasks') || '{}');
+  document.querySelectorAll('.task').forEach(el => {
+    if (done[el.dataset.id]) el.classList.add('done');
+  });
+  updateProgress();
+});
+</script>
+</body>
+</html>
